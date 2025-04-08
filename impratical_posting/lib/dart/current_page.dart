@@ -1,99 +1,129 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:impratical_posting/dart/edit_page.dart';
 
-class CurrentPage extends StatelessWidget {
-  final String question;
-  final String answer;
+class CurrentPage extends StatefulWidget {
+  const CurrentPage({Key? key}) : super(key: key);
 
-  const CurrentPage({
-    Key? key,
-    // 69 characters long (nice)
-    this.question = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-    // 420? characters maxlong (pass me the weed)
-    this.answer = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-  }) : super(key: key);
+  @override
+  _CurrentPageState createState() => _CurrentPageState();
+}
+
+class _CurrentPageState extends State<CurrentPage> {
+  String question = 'Loading...';
+  String answer = 'Loading...';
+  
+  @override
+  void initState() {
+    super.initState();
+    _fetchQnA();
+  }
+
+  Future<void> _fetchQnA() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('QuestionAnswer')
+          .select()
+          .limit(1)
+          .single();
+
+      setState(() {
+        question = response['Question'] ?? '';
+        answer = response['Answer'] ?? '';
+      });
+    } catch (e) {
+      setState(() {
+        question = 'Error loading question';
+        answer = 'Error loading answer';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black87,
       body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height*0.125,
-                child: Stack( 
-                  children:[
-                    Center(
-                      child: Text(
+        child:Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.125,
+              child: Stack(
+                children: [
+                  Center(
+                    child: Text(
+                      question,
                       textAlign: TextAlign.center,
                       maxLines: 3,
-                      this.question,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white
-                        ),
+                        color: Colors.white,
                       ),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: IconButton(
-                      icon: Icon(Icons.edit, color: Colors.white),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.white),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EditPage(answer: answer),
+                            builder: (context) =>
+                                EditPage(answer: answer),
                           ),
                         );
                       },
-                    )),
-                  ],
-                ),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: MediaQuery.of(context).size.height*0.025),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height*0.65,
-                color: Color.fromRGBO(200, 30, 50, 1),
-                child:Stack(
-                  children: [
-                    Center(
-                      child: Text(
-                        this.answer,
-                        maxLines: 16,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+            ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.025),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.65,
+              color: const Color.fromRGBO(200, 30, 50, 1),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Text(
+                      answer,
+                      maxLines: 16,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: IconButton(
-                      icon: Icon(Icons.edit, color: Colors.white),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.white),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EditPage(question: this.question),
+                            builder: (context) =>
+                                EditPage(question: question),
                           ),
                         );
                       },
-                    )),
-                  ],
-                )
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
     );
   }
 }
