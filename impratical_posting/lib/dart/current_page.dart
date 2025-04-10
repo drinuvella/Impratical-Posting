@@ -19,7 +19,11 @@ class _CurrentPageState extends State<CurrentPage> {
     _fetchQnA();
   }
 
-  Future<void> _fetchQnA() async {
+  Future _fetchQnA() async {
+    setState(() {
+        question = 'Loading...';
+        answer = 'Loading...';
+      });
     try {
       final response = await Supabase.instance.client
           .from('QuestionAnswer')
@@ -121,6 +125,7 @@ class _CurrentPageState extends State<CurrentPage> {
                 ],
               ),
             ),
+            IconButton(onPressed: _fetchQnA, icon: const Icon(Icons.refresh, color: Colors.white)),
           ],
         ),
       ),
