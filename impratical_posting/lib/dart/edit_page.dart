@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:impratical_posting/dart/current_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -24,10 +25,36 @@ class _EditPageState extends State<EditPage> {
   @override
   void initState() {
     super.initState();
+    _initFirebaseMessaging();
     _question = widget.question;
     _answer = widget.answer;
   }
 
+  Future<void> _initFirebaseMessaging() async {
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission();
+
+    String? token = await messaging.getToken();
+    if(token != null) {
+      await _setFcmToken(token);
+    }
+
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+      await _setFcmToken(newToken);
+    });
+  }
+
+  Future<void> _setFcmToken(String token) async {
+    try {
+      await Supabase.instance.client.from('NotificationTokens').insert({
+        'fcm_token': token,
+      });
+    } catch (e) {
+      print('Error setting FCM token: $e');
+    }
+  }
+  
   void _updatePost() async {
     if(! _formKey.currentState!.validate())
       return;

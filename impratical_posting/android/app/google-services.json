@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "684322104478",
+    "project_id": "impratical-posting",
+    "storage_bucket": "impratical-posting.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684322104478:android:18ecfbd10f2937b241c78f",
+        "android_client_info": {
+          "package_name": "com.example.impratical_posting"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdAOrBTIv-D2rO6VrJ7LegI-jnB2MduEM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
