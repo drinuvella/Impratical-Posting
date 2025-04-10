@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:impratical_posting/dart/current_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditPage extends StatefulWidget {
   final String question;
@@ -16,6 +17,7 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
+  final _formKey = GlobalKey<FormState>();
   late String _question;
   late String _answer;
 
@@ -26,43 +28,88 @@ class _EditPageState extends State<EditPage> {
     _answer = widget.answer;
   }
 
+  void _updatePost() async {
+    if(! _formKey.currentState!.validate())
+      return;
+
+    _formKey.currentState!.save();
+
+    final supabase = Supabase.instance.client;
+
+    final rowId = 'f6873045-8b16-40e9-80ed-8f3d0b95b8c0';
+
+    try {
+      final updates = <String, dynamic>{};
+
+        updates['Question'] = _question;
+        updates['Answer'] = _answer;
+
+      if (updates.isNotEmpty) {
+        final data = await supabase
+            .from('QuestionAnswer')
+            .update(updates)
+            .eq('ID', rowId);
+      }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CurrentPage(),
+        ),
+      );
+    } catch (error) {
+      print('Failed to update: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black87,
       body: Center(
-        child: Column(
+        child: Form(
+          key: _formKey,
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height*0.125,
-                child: _question.length>0 ?
-                  Text(
-                    _question,
-                    textAlign: TextAlign.center,
-                    maxLines: 3,
-                    style: TextStyle(
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ):
-                  TextField(
-                    decoration: InputDecoration(
-                        counterText: "",
-                        hintText: "Enter you question here"
-                      ),
-                    maxLength: 69,
-                    maxLines: 3,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height*0.125,
+              child: _question.length>0 ?
+                Text(
+                  _question,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ):
+                TextFormField(
+                  validator: (value){
+                  if (value == null || value.isEmpty){
+                    return 'Please enter a question';
+                  }
+                  return null;
+                },
+                onSaved: (value){
+                  _question = value!;
+                },
+                  decoration: InputDecoration(
+                    counterText: "",
+                    hintText: "Enter you question here"
+                  ),
+                  maxLength: 69,
+                  maxLines: 3,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
+              ),
             SizedBox(height: MediaQuery.of(context).size.height*0.025),
             Container(
               width: MediaQuery.of(context).size.width,
@@ -82,7 +129,7 @@ class _EditPageState extends State<EditPage> {
                     color: Colors.white,
                   ),
                 ):
-                TextField(
+                TextFormField(
                   decoration: InputDecoration(
                     counterText: "",
                     hintText: "Enter your answer here"
@@ -95,6 +142,15 @@ class _EditPageState extends State<EditPage> {
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
+                  validator: (value){
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an answer';
+                    }
+                    return null;
+                  },
+                  onSaved: (value){
+                    _answer = value!;
+                  }
                 ),
               ),
             ),
@@ -104,14 +160,7 @@ class _EditPageState extends State<EditPage> {
                 backgroundColor: Color.fromRGBO(200, 30, 50, 1),
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CurrentPage(),
-                    ),
-                  );
-              },
+              onPressed:_updatePost,
               child: Text(
                 'Update page',
                 style: TextStyle(
@@ -121,7 +170,7 @@ class _EditPageState extends State<EditPage> {
                 ),
               ),
             ),
-          ],
+          ],),
         ),
       ),    
     );
