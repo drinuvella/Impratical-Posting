@@ -1,16 +1,20 @@
+import 'package:camera/camera.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:impratical_posting/dart/camera_preview_screen.dart';
 import 'package:impratical_posting/dart/current_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditPage extends StatefulWidget {
   final String question;
   final String answer;
-
+  final CameraDescription camera;
+  
   EditPage({
     super.key,
     this.question = "", // 69 characters long 
     this.answer = "", // 420 characters long
+    required this.camera,
   });
 
   @override
@@ -22,12 +26,28 @@ class _EditPageState extends State<EditPage> {
   late String _question;
   late String _answer;
 
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+
   @override
   void initState() {
     super.initState();
     _initFirebaseMessaging();
     _question = widget.question;
     _answer = widget.answer;
+
+    _controller = CameraController(
+      widget.camera,
+      ResolutionPreset.medium,
+    );
+
+    _initializeControllerFuture = _controller.initialize();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _initFirebaseMessaging() async {
@@ -78,12 +98,7 @@ class _EditPageState extends State<EditPage> {
             .eq('ID', rowId);
       }
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CurrentPage(),
-        ),
-      );
+      Navigator.pop(context);
     } catch (error) {
       print('Failed to update: $error');
     }
@@ -182,21 +197,41 @@ class _EditPageState extends State<EditPage> {
               ),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(200, 30, 50, 1),
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-              ),
-              onPressed:_updatePost,
-              child: Text(
-                'Update page',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.photo_camera, color: Colors.white, size: 30),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CameraPreviewScreen(
+                          controller: _controller,
+                          initializeControllerFuture: _initializeControllerFuture,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(200, 30, 50, 1),
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                  ),
+                  onPressed:_updatePost,
+                  child: Text(
+                    'Update page',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+              ],
+            )
           ],),
         ),
       ),    

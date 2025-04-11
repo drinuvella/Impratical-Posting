@@ -1,9 +1,11 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:impratical_posting/dart/edit_page.dart';
 
 class CurrentPage extends StatefulWidget {
-  const CurrentPage({Key? key}) : super(key: key);
+  final CameraDescription camera;
+  const CurrentPage({Key? key,required this.camera,}) : super(key: key);
 
   @override
   _CurrentPageState createState() => _CurrentPageState();
@@ -78,7 +80,7 @@ class _CurrentPageState extends State<CurrentPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                EditPage(answer: answer),
+                                EditPage(answer: answer, camera: widget.camera),
                           ),
                         );
                       },
@@ -116,7 +118,7 @@ class _CurrentPageState extends State<CurrentPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                EditPage(question: question),
+                                EditPage(question: question, camera: widget.camera),
                           ),
                         );
                       },
